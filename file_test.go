@@ -2,6 +2,7 @@ package cfile
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -9,6 +10,25 @@ import (
 	"testing"
 
 	. "github.com/PathDNA/testutils"
+)
+
+// verify that we match the io.* interfaces.
+var (
+	_ io.Seeker     = (*Reader)(nil)
+	_ io.ReaderAt   = (*Reader)(nil)
+	_ io.ReadCloser = (*Reader)(nil)
+
+	_ io.Seeker      = (*Writer)(nil)
+	_ io.WriterAt    = (*Writer)(nil)
+	_ io.WriteCloser = (*Writer)(nil)
+
+	_ io.Reader     = (*File)(nil)
+	_ io.ReaderFrom = (*File)(nil)
+	_ io.ReaderAt   = (*File)(nil)
+	_ io.Writer     = (*File)(nil)
+	_ io.WriterTo   = (*File)(nil)
+	_ io.WriterAt   = (*File)(nil)
+	_ io.Closer     = (*File)(nil)
 )
 
 var dummyData = bytes.Repeat([]byte("0123456789"), 2)

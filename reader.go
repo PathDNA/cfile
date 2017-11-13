@@ -5,12 +5,6 @@ import (
 	"os"
 )
 
-var (
-	_ io.Seeker     = (*Reader)(nil)
-	_ io.ReaderAt   = (*Reader)(nil)
-	_ io.ReadCloser = (*Reader)(nil)
-)
-
 // Reader returns f.SectionReader(0, -1).
 func (f *File) Reader() *Reader { return f.SectionReader(0, -1) }
 

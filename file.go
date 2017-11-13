@@ -10,16 +10,8 @@ import (
 	"os"
 	"sync"
 	"sync/atomic"
-)
 
-var (
-	_ io.Reader     = (*File)(nil)
-	_ io.ReaderFrom = (*File)(nil)
-	_ io.ReaderAt   = (*File)(nil)
-	_ io.Writer     = (*File)(nil)
-	_ io.WriterTo   = (*File)(nil)
-	_ io.WriterAt   = (*File)(nil)
-	_ io.Closer     = (*File)(nil)
+	"github.com/Path94/atoms"
 )
 
 // New opens `fp`` with `os.O_CREATE|os.O_RDWR`` and the given permissions.
@@ -81,7 +73,7 @@ type File struct {
 	wg sync.WaitGroup
 
 	size int64
-
+	atoms.Int64
 	SyncAfterWriterClose bool // if set to true, calling `Writer.Close()`, will call `*os.File.Sync()`.
 }
 

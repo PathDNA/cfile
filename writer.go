@@ -5,12 +5,6 @@ import (
 	"os"
 )
 
-var (
-	_ io.Seeker      = (*Writer)(nil)
-	_ io.WriterAt    = (*Writer)(nil)
-	_ io.WriteCloser = (*Writer)(nil)
-)
-
 // Writer returns f.WriteAt(-1).
 func (f *File) Writer() *Writer {
 	return f.WriterAt(-1)
