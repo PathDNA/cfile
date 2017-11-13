@@ -156,6 +156,9 @@ func (f *File) Name() string {
 	return f.f.Name()
 }
 
+// Fd returns the underlying `*os.File`'s file descriptor.
+func (f *File) Fd() int { return int(f.f.Fd()) }
+
 // With acquires a write lock and calls fn with the underlying `*os.File` and returns any errors it returns.
 func (f *File) With(fn func(*os.File) error) error {
 	f.mux.Lock()
