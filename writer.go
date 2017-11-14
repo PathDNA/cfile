@@ -84,6 +84,7 @@ func (w *Writer) Close() (err error) {
 		return
 	}
 
-	w.f.setSize(sz)
+	w.f.sz.Store(sz)
+
 	return
 }

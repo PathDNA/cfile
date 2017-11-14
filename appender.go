@@ -37,7 +37,7 @@ func (a *appender) Close() (err error) {
 		err = a.f.f.Sync()
 	}
 
-	a.f.addSize(a.sz)
+	a.f.sz.Add(a.sz)
 
 	a.f.wg.Done()
 	a.f.amux.Unlock()

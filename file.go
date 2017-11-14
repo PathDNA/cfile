@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"os"
 	"sync"
-	"sync/atomic"
 
 	"github.com/Path94/atoms"
 )
@@ -50,17 +49,19 @@ func TempFile(dir, prefix string) (*File, error) {
 // FromFile returns a `*File` from an `*os.File`.
 // Using `f.Writer` requires that the file to *not* be opened with os.O_APPEND.
 // On success, the returned `*File` will handle closing the `*os.File`.
-func FromFile(f *os.File) (*File, error) {
-	sz, err := getSize(f)
-
-	if err != nil {
+func FromFile(in *os.File) (f *File, err error) {
+	var sz int64
+	if sz, err = getSize(in); err != nil {
 		return nil, err
 	}
 
-	return &File{
-		f:    f,
-		size: sz,
-	}, nil
+	f = &File{
+		f: in,
+	}
+
+	f.sz.Store(sz)
+
+	return
 }
 
 // File is an `*os.File` wrapper that allows multiple readers or one writer or appender on a single file descriptor.
@@ -72,8 +73,8 @@ type File struct {
 
 	wg sync.WaitGroup
 
-	size int64
-	atoms.Int64
+	sz atoms.Int64
+
 	SyncAfterWriterClose bool // if set to true, calling `Writer.Close()`, will call `*os.File.Sync()`.
 }
 
@@ -132,7 +133,7 @@ func (f *File) Write(b []byte) (n int, err error) {
 func (f *File) Truncate(sz int64) (err error) {
 	f.mux.Lock()
 	if err = f.f.Truncate(sz); err == nil {
-		f.setSize(sz)
+		f.sz.Store(sz)
 	}
 	f.mux.Unlock()
 	return
@@ -140,7 +141,7 @@ func (f *File) Truncate(sz int64) (err error) {
 
 // Size returns the current file size.
 // the size is cached after each writer is closed, so it doesn't call Stat().
-func (f *File) Size() int64 { return atomic.LoadInt64(&f.size) }
+func (f *File) Size() int64 { return f.sz.Load() }
 
 // Stat calls the underlying `*os.File.Stat()`.
 // Will block if there are any active appenders or writers.
@@ -181,9 +182,6 @@ func (f *File) Close() error {
 
 	return err
 }
-
-func (f *File) setSize(sz int64)          { atomic.StoreInt64(&f.size, sz) }
-func (f *File) addSize(delta int64) int64 { return atomic.AddInt64(&f.size, delta) }
 
 func getSize(f *os.File) (int64, error) {
 	st, err := f.Stat()
