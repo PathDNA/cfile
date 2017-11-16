@@ -161,10 +161,13 @@ func (f *File) Name() string {
 func (f *File) Fd() int { return int(f.f.Fd()) }
 
 // With acquires a write lock and calls fn with the underlying `*os.File` and returns any errors it returns.
-func (f *File) With(fn func(*os.File) error) error {
+func (f *File) With(fn func(*os.File) error) (err error) {
 	f.mux.Lock()
 	defer f.mux.Unlock()
-	return fn(f.f)
+	err = fn(f.f)
+	sz, _ := getSize(f.f) // ignoring this error
+	f.sz.Store(sz)
+	return
 }
 
 // ForceClose will close the underlying `*os.File` without waiting for any active readers/writer.
